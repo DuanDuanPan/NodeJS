@@ -2,7 +2,7 @@ var socketio = require('socket.io');
 var io;
 var guestNumber = 1;
 var nickNames = {};
-var namesUsed = {};
+var namesUsed = [];
 var currentRoom = {};
 
 exports.listen = function(server) {
@@ -16,7 +16,7 @@ exports.listen = function(server) {
 		// 发送聊天消息
 		handleMessageBroadcasting(socket, nickNames);
 		// 修改昵称
-		handleNameChangeAttempts(socket, nickNames, nameUsed);
+		handleNameChangeAttempts(socket, nickNames, namesUsed);
 		// 创建聊天室
 		handleRoomJoining(socket);
 
@@ -24,11 +24,11 @@ exports.listen = function(server) {
 			socket.emit('rooms', io.sockets.manager.rooms);
 		});
 		// 断开连接
-		handleClientDisconnection(socket, nickNames, nameUsed);
+		handleClientDisconnection(socket, nickNames, namesUsed);
 	});
 };
 
-function assignGuestName(socket, guestNumber;, nickNames, namesUsed) {
+function assignGuestName(socket, guestNumber, nickNames, namesUsed) {
 	var name = 'Guest' + guestNumber;
 	nickNames[socket.id] = name;
 	socket.emit('nameResult', {
@@ -49,7 +49,7 @@ function joinRoom(socket, room) {
 		room: room
 	});
 	socket.broadcast.to(room).emit('message', {
-		text: nickNames[socket.id] + 'has joined' + room + '.'
+		text: nickNames[socket.id] + 'has joined ' + room + '.'
 	});
 
 	// 确定当前房间中所有人数
@@ -58,15 +58,15 @@ function joinRoom(socket, room) {
 	if (usersInRoom.length > 1) {
 		var userInRoomSummary = 'Users currently in ' + room + ' : ';
 		for (var index in usersInRoom) {
-			var userSocketId = userInRoom[index].id;
-			if (userSocketId!socket.id) {
+			var userSocketId = usersInRoom[index].id;
+			if (userSocketId!=socket.id) {
 				if (index > 0) {
 					userInRoomSummary += ', ';
 				}
 				userInRoomSummary += nickNames[userSocketId];
 			}
 		}
-		usersInRoomSummary += '.';
+		userInRoomSummary += '.';
 		socket.emit('message', {
 			text: userInRoomSummary
 		});
