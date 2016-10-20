@@ -1,0 +1,3 @@
+http://www.xinhuanet.com/politics/news_politics.xml
+http://www.xinhuanet.com/world/news_world.xml
+http://www.xinhuanet.com/local/news_province.xml
